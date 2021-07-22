@@ -1,0 +1,42 @@
+# Run this once per account to create necessary infrastructure for:
+# - Shared deployment S3 bucket
+# - Domain Certificate setup
+# - Other things you only want run once per account
+service: hub-root
+
+# New variable resolver
+variablesResolutionMode: 20210326
+
+provider:
+  name: aws
+  stage: ${file(./serverless.config.js):stage}
+  region: ${file(./serverless.config.js):region}
+
+resources:
+  Resources:
+    # Certificate for domain name.
+    DomainCertificate:
+      Type: AWS::CertificateManager::Certificate
+      Properties:
+        DomainName: ${file(./serverless.config.js):baseDomain}
+        DomainValidationOptions:
+          - DomainName: ${file(./serverless.config.js):baseDomain}
+            HostedZoneId: ${file(./serverless.config.js):hostedZone}
+          - DomainName: www.${file(./serverless.config.js):baseDomain}
+            HostedZoneId: ${file(./serverless.config.js):hostedZone}
+        SubjectAlternativeNames:
+          - www.${file(./serverless.config.js):baseDomain}
+          - "*.${file(./serverless.config.js):baseDomain}"
+        ValidationMethod: DNS
+
+    DeploymentBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${file(./serverless.config.js):deploymentBucket}
+
+  Outputs:
+    DomainCertificate:
+      Value:
+        Ref: DomainCertificate
+      Export:
+        Name: ${file(./serverless.config.js):certificateArn}        

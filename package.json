@@ -1,0 +1,25 @@
+{
+  "name": "hub-pub",
+  "version": "0.0.1",
+  "description": "A great pub to find a decent serverless api or backend system, straight from the tap.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WSanders31/hub-pub.git"
+  },
+  "author": "Will Sanders",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WSanders31/hub-pub/issues"
+  },
+  "homepage": "https://github.com/WSanders31/hub-pub#readme",
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
+    "hygen": "^6.1.0",
+    "serverless": "^2.52.1",
+    "serverless-domain-manager": "^5.1.3"
+  }
+}

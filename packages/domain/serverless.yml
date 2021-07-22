@@ -1,0 +1,63 @@
+# domain
+service: ${self:custom.domain}
+
+# New variable resolver
+variablesResolutionMode: 20210326
+projectDir: ../..
+
+custom:
+    # API Domain name
+    domain: domain
+
+provider:
+    name: aws
+    runtime: nodejs14.x
+    stage: ${file(../../serverless.config.js):stage}
+    region: ${file(../../serverless.config.js):region}
+    deploymentBucket: ${file(../../serverless.config.js):deploymentBucket}
+    versionFunctions: false
+    logRetentionInDays: 30
+
+    # NodeJS environment variables
+    environment:
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # Reuse DynamoDB TCP connection
+        STAGE: ${self:provider.stage}
+        REGION: ${self:provider.region}
+
+        #DYNAMODB:
+    # iamRoleStatements:
+    #   - Effect: "Allow"
+    #     Action:
+    #       - "dynamodb:*"
+    #     Resource: !ImportValue ${file(../../serverless.config.js):sharedProperties.dynamodb}
+
+    # Shared API Gateway - using exported api name to make cross-stack reference
+    httpApi:
+        id: !ImportValue ${file(../../serverless.config.js):apiName}
+
+# Lambda functions
+functions:
+    get:
+        handler: ./dist/src/handler.getDomain
+        events:
+            - httpApi:
+                  path: /${self:custom.domain}/{id}
+                  method: GET
+    create:
+        handler: ./dist/src/handler.createDomain
+        events:
+            - httpApi:
+                  path: /${self:custom.domain}
+                  method: GET
+    update:
+        handler: ./dist/src/handler.putDomain
+        events:
+            - httpApi:
+                  path: /${self:custom.domain}
+                  method: PUT
+    delete:
+        handler: ./dist/src/handler.deleteDomain
+        events:
+            - httpApi:
+                  path: /${self:custom.domain}/{id}
+                  method: DELETE

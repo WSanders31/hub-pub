@@ -1,0 +1,79 @@
+# Run this once per stage, to establish all shared infrastructure across microservices
+service: hub-api
+
+# New variable resolver
+variablesResolutionMode: 20210326
+
+provider:
+  name: aws
+  stage: ${file(./serverless.config.js):stage}
+  region: ${file(./serverless.config.js):region}
+  deploymentBucket: ${file(./serverless.config.js):deploymentBucket}
+
+resources:
+  Resources:
+    HubApi:
+      Type: AWS::ApiGatewayV2::Api
+      Properties:
+        Name: ${file(./serverless.config.js):apiName}
+        ProtocolType: HTTP
+        CorsConfiguration:
+          AllowHeaders:
+            - "*"
+          AllowMethods:
+            - "*"
+          AllowOrigins:
+            - "*"
+
+    HubApiDomainName:          
+      Type: AWS::ApiGatewayV2::DomainName
+      Properties: 
+        DomainName: ${file(./serverless.config.js):stageDomain}
+        DomainNameConfigurations: 
+            - CertificateArn: !ImportValue ${file(./serverless.config.js):certificateArn}
+              EndpointType: regional
+              SecurityPolicy: TLS_1_2
+
+    HubApiRoute53RecordSetGroup:
+      DependsOn:
+        - HubApiDomainName
+      Type: AWS::Route53::RecordSetGroup
+      Properties:
+        HostedZoneId: ${file(./serverless.config.js):hostedZone}
+        RecordSets:
+          - Name: ${file(./serverless.config.js):stageDomain}
+            Type: A
+            AliasTarget:
+              HostedZoneId: !GetAtt HubApiDomainName.RegionalHostedZoneId
+              DNSName: !GetAtt HubApiDomainName.RegionalDomainName
+          - Name: ${file(./serverless.config.js):stageDomain}
+            Type: AAAA
+            AliasTarget:
+              HostedZoneId: !GetAtt HubApiDomainName.RegionalHostedZoneId
+              DNSName: !GetAtt HubApiDomainName.RegionalDomainName
+
+    HubApiStage:
+      DependsOn:
+        - HubApi
+      Type: "AWS::ApiGatewayV2::Stage"
+      Properties:
+        StageName: $default
+        ApiId: !Ref HubApi
+        AutoDeploy: true
+
+    HubApiMapping:
+      DependsOn:
+        - HubApiRoute53RecordSetGroup 
+      Type: "AWS::ApiGatewayV2::ApiMapping"
+      Properties:
+        DomainName: ${file(./serverless.config.js):stageDomain}
+        ApiId: !Ref HubApi
+        Stage: !Ref HubApiStage
+        ApiMappingKey: api            
+
+  Outputs:
+    HubApi:
+      Value:
+        Ref: HubApi
+      Export:
+        Name: ${file(./serverless.config.js):apiName}
