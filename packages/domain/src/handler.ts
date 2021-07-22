@@ -7,7 +7,7 @@ export async function getDomain(event: APIGatewayEvent): Promise<APIGatewayProxy
 
     const id = event.pathParameters?.id;
     if (id) {
-        const domain: Domain | undefined = await domainService.getDomain(id);
+        const domain: Domain | null = await domainService.getDomain(id);
 
         return {
             statusCode: 200,
