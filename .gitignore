@@ -2,3 +2,6 @@ node_modules
 .serverless
 dist
 .DS_Store
+openapitools.json
+.webpack
+tsoa

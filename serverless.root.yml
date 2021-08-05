@@ -39,4 +39,4 @@ resources:
       Value:
         Ref: DomainCertificate
       Export:
-        Name: ${file(./serverless.config.js):certificateArn}        
+        Name: ${file(./serverless.config.js):certificateArnExport}        

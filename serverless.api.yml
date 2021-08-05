@@ -30,7 +30,7 @@ resources:
       Properties: 
         DomainName: ${file(./serverless.config.js):stageDomain}
         DomainNameConfigurations: 
-            - CertificateArn: !ImportValue ${file(./serverless.config.js):certificateArn}
+            - CertificateArn: !ImportValue ${file(./serverless.config.js):certificateArnExport}
               EndpointType: regional
               SecurityPolicy: TLS_1_2
 
