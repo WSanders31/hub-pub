@@ -1,4 +1,4 @@
-# platform-core
+# serverless-pub
 
 # quick start
 
